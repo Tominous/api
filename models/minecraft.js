@@ -85,15 +85,6 @@ var MinecraftMatch = new Schema({
     initializedDate : Number,
     startedDate     : Number,
     finishedDate    : Number,
-    chat            : [{
-        user: ObjectId,
-        username: String,
-        uuid: String,
-        message: String,
-        team: String,
-        matchTime: Number,
-        teamChat: Boolean
-    }],
     deaths: [ObjectId],
     winners: [ObjectId],
     losers: [ObjectId],

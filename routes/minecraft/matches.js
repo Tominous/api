@@ -45,53 +45,47 @@ module.exports = function (app) {
         console.log('match body: ' + JSON.stringify(req.body, null, 2));
 
         var allUserIds = new Array();
-        async.eachSeries(req.body.chat, function(chat, next) {
-            chat.user = mongoose.Types.ObjectId(chat.user);
+        var fixedDeaths = new Array();
+        async.eachSeries(req.body.deaths, function(death, next) {
+            fixedDeaths.push(mongoose.Types.ObjectId(death));
             next();
         }, function(err) {
-            var fixedDeaths = new Array();
-            async.eachSeries(req.body.deaths, function(death, next) {
-                fixedDeaths.push(mongoose.Types.ObjectId(death));
+            var fixedWinners = new Array();
+            async.eachSeries(req.body.winners, function(winner, next) {
+                fixedWinners.push(mongoose.Types.ObjectId(winner));
+                allUserIds.push(winner);
                 next();
             }, function(err) {
-                var fixedWinners = new Array();
-                async.eachSeries(req.body.winners, function(winner, next) {
-                    fixedWinners.push(mongoose.Types.ObjectId(winner));
-                    allUserIds.push(winner);
+                var fixedLosers = new Array();
+                async.eachSeries(req.body.losers, function(loser, next) {
+                    fixedLosers.push(mongoose.Types.ObjectId(loser));
+                    allUserIds.push(loser);
                     next();
                 }, function(err) {
-                    var fixedLosers = new Array();
-                    async.eachSeries(req.body.losers, function(loser, next) {
-                        fixedLosers.push(mongoose.Types.ObjectId(loser));
-                        allUserIds.push(loser);
-                        next();
-                    }, function(err) {
-                        MinecraftMatch.update({_id: mongoose.Types.ObjectId(req.body.id)}, {$set: {
-                            map: mongoose.Types.ObjectId(req.body.map),
-                            startedDate: req.body.startedDate,
-                            finishedDate: req.body.finishedDate,
-                            chat: req.body.chat,
-                            deaths: fixedDeaths,
-                            winners: fixedWinners,
-                            losers: fixedLosers,
-                            teamMappings: req.body.teamMappings,
-                            winningTeam: req.body.winningTeam
-                        }}, function(err) {
-                            if(err) {
-                                console.log(err);
-                            }
-                            res.json({})
-                        });
+                    MinecraftMatch.update({_id: mongoose.Types.ObjectId(req.body.id)}, {$set: {
+                        map: mongoose.Types.ObjectId(req.body.map),
+                        startedDate: req.body.startedDate,
+                        finishedDate: req.body.finishedDate,
+                        deaths: fixedDeaths,
+                        winners: fixedWinners,
+                        losers: fixedLosers,
+                        teamMappings: req.body.teamMappings,
+                        winningTeam: req.body.winningTeam
+                    }}, function(err) {
+                        if(err) {
+                            console.log(err);
+                        }
+                        res.json({})
+                    });
 
-                        MinecraftUser.update({_id: {$in: fixedWinners}}, {$inc: {wins: 1}}, {multi: true}, function(err) {
+                    MinecraftUser.update({_id: {$in: fixedWinners}}, {$inc: {wins: 1}}, {multi: true}, function(err) {
+                        if(err) console.log(err);
+                        MinecraftUser.update({_id: {$in: fixedLosers}}, {$inc: {losses: 1}}, {multi: true}, function(err) {
                             if(err) console.log(err);
-                            MinecraftUser.update({_id: {$in: fixedLosers}}, {$inc: {losses: 1}}, {multi: true}, function(err) {
-                                if(err) console.log(err);
 
-                                MinecraftUser.update({_id: {$in: allUserIds}},
-                                    {$addToSet: {matches: mongoose.Types.ObjectId(req.body.id)}}, {multi: true}, function(err) {
-                                    if(err) console.log(err);
-                                })
+                            MinecraftUser.update({_id: {$in: allUserIds}},
+                                {$addToSet: {matches: mongoose.Types.ObjectId(req.body.id)}}, {multi: true}, function(err) {
+                                if(err) console.log(err);
                             })
                         })
                     })
