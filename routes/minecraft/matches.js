@@ -245,7 +245,7 @@ module.exports = function (app) {
 
                     //Load deaths for the match and calculate each player's stats (kdr)
                     function(callback) {
-                        MinecraftDeath.find({match: match._id}, function(err, deaths) {
+                        MinecraftDeath.find({match: match._id}).lean().limit(10).exec(function(err, deaths) {
                             if(err) console.log(err);
 
                             console.log('found ' + deaths.length + ' deaths.');
