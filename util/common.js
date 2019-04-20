@@ -6,7 +6,7 @@ var async = require('async');
 var privateKey = config.key.privateKey;
 
 // create reusable transport method (opens pool of SMTP connections)
-// console.log(Config.email.username+'  '+Config.email.password);
+ console.log(Config.email.username+'  '+Config.email.password);
 var smtpTransport = nodemailer.createTransport({
     service: 'Gmail',
     auth: {
@@ -29,7 +29,7 @@ exports.sendMailVerificationLink = function(user, token) {
     var mailbody = '<p>Thanks for Registering on ' + config.email.accountName + ' </p><p>Please verify your email by clicking on the verification link below.<br/><a href=' + textLink.toString()
         + '>Verification Link</a></p>';
 
-    // mail(from, user.username , 'Account Verification', mailbody);
+     mail(from, user.username , 'Account Verification', mailbody);
     mail(from, 'chattonluke@gmail.com' , 'Account Verification', mailbody);
 };
 
